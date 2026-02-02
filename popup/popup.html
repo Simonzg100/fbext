@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Rental Assistant</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Facebook Rental Assistant</h2>
+
+    <div class="section">
+      <button id="openDashboard" style="background:#42b72a;">Open Dashboard</button>
+    </div>
+
+    <div class="section">
+      <h3>Conversation History (<span id="conversationCount">0</span>)</h3>
+      <div id="conversationList"></div>
+      <button id="clearMemory">Clear History</button>
+    </div>
+
+    <div class="section">
+      <h3>Tenant Information (<span id="tenantCount">0</span>)</h3>
+      <div id="tenantList"></div>
+      <button id="exportCSV">Export CSV</button>
+    </div>
+
+    <div class="section">
+      <h3>Instructions</h3>
+      <ol>
+        <li>Open Facebook Messenger</li>
+        <li>Click "Auto Mode (All)" for automatic monitoring</li>
+        <li>Or use "Start Auto Reply" for single conversation</li>
+        <li>Check this dashboard to see history</li>
+      </ol>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

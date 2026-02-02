@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Rental Assistant Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <h1>Rental Assistant</h1>
+      </div>
+
+      <nav class="nav">
+        <a href="#" class="nav-item active" data-view="conversations">
+          <span class="icon">💬</span>
+          Conversations
+        </a>
+        <a href="#" class="nav-item" data-view="tenants">
+          <span class="icon">👥</span>
+          Tenant Info
+        </a>
+        <a href="#" class="nav-item" data-view="settings">
+          <span class="icon">⚙️</span>
+          Settings
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="clearAllData" class="btn-danger">Clear All Data</button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <div class="header">
+        <h2 id="pageTitle">Conversations</h2>
+        <div class="header-actions">
+          <button id="refreshData" class="btn-secondary">Refresh</button>
+          <button id="exportData" class="btn-primary">Export CSV</button>
+        </div>
+      </div>
+
+      <!-- Conversations View -->
+      <div id="conversationsView" class="view active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="totalConversations">0</div>
+            <div class="stat-label">Total Conversations</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalTenants">0</div>
+            <div class="stat-label">Tenant Contacts</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="totalMessages">0</div>
+            <div class="stat-label">Messages Sent</div>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <h3>Tenant Inquiries</h3>
+          <table id="tenantsTable">
+            <thead>
+              <tr>
+                <th>Tenant Name</th>
+                <th>Property</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Move-in Date</th>
+                <th>Last Reply</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="tenantsTableBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tenants View -->
+      <div id="tenantsView" class="view">
+        <div class="tenants-list">
+          <h3>Collected Tenant Information</h3>
+          <div id="tenantsList"></div>
+        </div>
+      </div>
+
+      <!-- Settings View -->
+      <div id="settingsView" class="view">
+        <div class="settings-section">
+          <h3>Auto Reply Message</h3>
+          <textarea id="replyTemplate" rows="10" placeholder="Enter your auto-reply message template..."></textarea>
+          <button id="saveTemplate" class="btn-primary">Save Template</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>Monitoring Settings</h3>
+          <label>
+            <input type="checkbox" id="autoMonitor">
+            Enable auto-monitoring on page load
+          </label>
+          <label>
+            Check interval (seconds):
+            <input type="number" id="checkInterval" value="10" min="5" max="60">
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

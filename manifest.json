@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Facebook Rental Assistant",
+  "version": "1.0.0",
+  "description": "自动回复Facebook Marketplace租房询问",
+  "permissions": ["storage", "activeTab", "clipboardWrite"],
+  "host_permissions": [
+    "https://www.facebook.com/*",
+    "https://www.messenger.com/*"
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.facebook.com/marketplace/*",
+        "https://facebook.com/marketplace/*"
+      ],
+      "js": ["content/marketplace-scraper.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.facebook.com/messages/*",
+        "https://www.messenger.com/*"
+      ],
+      "js": ["content/messenger-handler.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html"
+  }
+}
