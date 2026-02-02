@@ -5,7 +5,9 @@
       "Bash(del \"c:\\Users\\wzhang\\Desktop\\chrome\\content\\messenger-handler.js\")",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

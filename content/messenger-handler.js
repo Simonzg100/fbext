@@ -64,12 +64,42 @@ async function getCurrentConversation() {
   const conversation = [];
 
   messages.forEach(msg => {
-    const textElement = msg.querySelector('[dir="auto"]');
-    if (textElement) {
-      const text = textElement.innerText;
+    // Look for all div[dir="auto"] within this row
+    const textElements = msg.querySelectorAll('[dir="auto"]');
 
-      // Check if message is from me by looking for specific indicators
-      // Try multiple methods to detect if it's my message
+    textElements.forEach(textElement => {
+      const text = textElement.innerText.trim();
+
+      // Skip empty messages and UI elements
+      if (!text || text.length === 0) return;
+
+      // Skip common UI text patterns
+      const uiPatterns = [
+        /^You sent$/i,
+        /^Message sent$/i,
+        /started this chat/i,
+        /View buyer profile/i,
+        /is waiting for your response/i,
+        /Send a quick response/i,
+        /^Today at/i,
+        /^\d{1,2}:\d{2}\s*(AM|PM)$/i,
+        /^[A-Z][a-z]+ \d{1,2}, \d{4}$/i, // Date format like "December 2, 2025"
+        /·.*Private [Rr]oom/i, // "Name · Private Room For Rent"
+      ];
+
+      const isUIElement = uiPatterns.some(pattern => pattern.test(text));
+      if (isUIElement) {
+        console.log('Skipping UI element:', text);
+        return;
+      }
+
+      // Skip if it's just a name (single word or two words without special chars)
+      if (/^[A-Z][a-z]+(\s[A-Z][a-z]+)?$/.test(text) && text.length < 30) {
+        console.log('Skipping name:', text);
+        return;
+      }
+
+      // Check if message is from me
       let isFromMe = false;
 
       // Method 1: Check aria-label
@@ -78,19 +108,24 @@ async function getCurrentConversation() {
         isFromMe = true;
       }
 
-      // Method 2: Check for specific class or data attributes
-      if (!isFromMe && msg.closest('[data-scope="messages_table"]')) {
-        const tableLabel = msg.closest('[data-scope="messages_table"]').getAttribute('aria-label');
-        if (tableLabel && tableLabel.includes('You')) {
+      // Method 2: Check parent elements for "You sent" indicator
+      let parent = textElement.parentElement;
+      let depth = 0;
+      while (parent && depth < 5) {
+        const parentText = parent.innerText;
+        if (parentText && parentText.includes('You sent')) {
           isFromMe = true;
+          break;
         }
+        parent = parent.parentElement;
+        depth++;
       }
 
       conversation.push({
         text: text,
         isFromMe: isFromMe
       });
-    }
+    });
   });
 
   console.log('Conversation messages found:', conversation.length);
