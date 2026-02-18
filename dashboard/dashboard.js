@@ -65,16 +65,29 @@ function displayTenantsTable(detailedTenants) {
   detailedTenants.sort((a, b) => b.lastReplyTime - a.lastReplyTime);
 
   tbody.innerHTML = detailedTenants.map(tenant => {
-    const lastReply = new Date(tenant.lastReplyTime).toLocaleString();
+    // Determine screening status based on collected info
+    const infoFields = [tenant.budget, tenant.moveInDate, tenant.occupation, tenant.phone, tenant.creditScore];
+    const filledCount = infoFields.filter(f => f).length;
+    let statusLabel = 'New';
+    let statusClass = 'status-new';
+    if (filledCount >= 5) {
+      statusLabel = 'Complete';
+      statusClass = 'status-complete';
+    } else if (filledCount >= 1) {
+      statusLabel = `${filledCount}/5 info`;
+      statusClass = 'status-active';
+    }
+
     return `
-      <tr>
+      <tr title="${escapeHtml(tenant.summary || '')}">
         <td><strong>${escapeHtml(tenant.tenantName)}</strong></td>
         <td>${escapeHtml(tenant.property)}</td>
-        <td>${tenant.phone || '-'}</td>
-        <td>${tenant.email || '-'}</td>
+        <td>${escapeHtml(tenant.budget || '-')}</td>
         <td>${tenant.moveInDate || '-'}</td>
-        <td>${lastReply}</td>
-        <td><span class="status-badge status-active">${tenant.status}</span></td>
+        <td>${escapeHtml(tenant.occupation || '-')}</td>
+        <td>${tenant.phone || '-'}</td>
+        <td>${escapeHtml(tenant.creditScore || '-')}</td>
+        <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
       </tr>
     `;
   }).join('');
@@ -159,20 +172,64 @@ document.getElementById('clearAllData').addEventListener('click', async () => {
   }
 });
 
-// Settings
+// Settings - API Key
+document.getElementById('saveApiKey').addEventListener('click', async () => {
+  const apiKey = document.getElementById('geminiApiKey').value.trim();
+  if (!apiKey) {
+    alert('Please enter an API key.');
+    return;
+  }
+  await chrome.storage.local.set({ geminiApiKey: apiKey });
+  alert('API Key saved!');
+});
+
+// Default AI prompt (keep in sync with service-worker.js)
+const DEFAULT_PROMPT = `You are Simon, a rental assistant for Tian Realty. You are chatting with potential tenants on Facebook Messenger.
+
+Your goal is to screen tenants by collecting the following information through friendly, natural conversation:
+
+Required (must collect all 5):
+1. Budget range - how much they can pay per month
+2. Move-in date - when they want to move in
+3. Lease length - how long they want to rent (e.g. 6 months, 12 months)
+4. Occupation - what they do (student, working, etc.)
+5. Phone number - so the property manager can contact them
+
+Optional (ask only after all required info is collected):
+6. Credit score or credit history
+
+Rules:
+- Be friendly, professional, and concise.
+- If this is the first message, greet them and ask ALL 5 required items at once.
+- Check what info the tenant already provided. Ask for ALL remaining missing items together in one message, not one by one.
+- Once all 5 required items are collected, ask about credit score (optional). If they don't have one, that's fine.
+- Once everything is collected, thank them and let them know a property manager will contact them shortly. Mention our website tianrealty.com for more listings.
+- Keep replies SHORT. Just list what you still need.
+- NEVER repeat, restate, or paraphrase what the tenant said. Just ask for what's missing.
+- Always reply in English.
+- Do NOT use markdown formatting. Write plain text only, as this will be sent in Facebook Messenger.`;
+
+// Settings - AI Instructions
 document.getElementById('saveTemplate').addEventListener('click', async () => {
   const template = document.getElementById('replyTemplate').value;
   await chrome.storage.local.set({ replyTemplate: template });
-  alert('Template saved!');
+  alert('Instructions saved!');
+});
+
+document.getElementById('resetTemplate').addEventListener('click', () => {
+  document.getElementById('replyTemplate').value = DEFAULT_PROMPT;
+  alert('Reset to default. Click "Save Instructions" to apply.');
 });
 
 // Load settings
 async function loadSettings() {
-  const data = await chrome.storage.local.get(['replyTemplate', 'autoMonitor', 'checkInterval']);
+  const data = await chrome.storage.local.get(['geminiApiKey', 'replyTemplate', 'autoMonitor', 'checkInterval']);
 
-  if (data.replyTemplate) {
-    document.getElementById('replyTemplate').value = data.replyTemplate;
+  if (data.geminiApiKey) {
+    document.getElementById('geminiApiKey').value = data.geminiApiKey;
   }
+
+  document.getElementById('replyTemplate').value = data.replyTemplate || DEFAULT_PROMPT;
 
   document.getElementById('autoMonitor').checked = data.autoMonitor || false;
   document.getElementById('checkInterval').value = data.checkInterval || 10;
